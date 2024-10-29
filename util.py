@@ -5,6 +5,7 @@ import os
 from mimetypes import guess_type
 from typing import Optional, Type
 
+import ollama
 from openai import AzureOpenAI, OpenAI
 from openai._base_client import BaseClient
 from openai.types.chat import ParsedChatCompletionMessage
@@ -152,3 +153,64 @@ class AzureModelWrapper(ModelWrapper):
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
         super().__init__(self.client, model_name, log_file)
+
+
+class OllamaModelWrapper(ModelWrapper):
+    def __init__(self, model_name : str = "minicpm-v", log_file = None, api_version = ""):
+        self.client = ollama.Client(
+            host="http://localhost:11434"
+        )
+        super().__init__(self.client, model_name, log_file)
+    
+    def _ollama_reformat_messages(self, messages: list[dict[str, str]]) -> list[dict[str, str]]:
+        o_messages = []
+        for msg_raw in messages:
+            msg = {m['type'] : m[m['type']] for m in msg_raw['content']}
+            o_msg = {
+                'role' : msg_raw['role'],
+                'content' : msg['text']
+            }
+            if 'image_url' in msg:
+                o_msg['images'] = [msg['image_url']['url'][22:]]
+            o_messages.append(o_msg)
+        return o_messages
+    
+    def _openai_reformat_messages(self, ollama_msg: dict) -> dict:
+        openai_msg = {
+            "role" : ollama_msg["role"],
+            "content" : {
+                "type" : "text",
+                "text": ollama_msg["content"]
+            }
+        }
+        return openai_msg
+
+    def complete(self, messages: dict[str, str], **kwargs) -> str:
+        ollama_messages = self._ollama_reformat_messages(messages)
+        response = self.client.chat(
+            model=self.model_name,
+            messages=ollama_messages,
+            **kwargs
+        )
+        resp_msg = response['message']
+        resp_content = resp_msg['content']
+        self.stats["requests"] += 1
+        self.stats["input_tokens"] += response['eval_count']
+        self.stats["completion_tokens"] += response['eval_count']
+        if self.log_file is not None:
+            msg_copy = messages.copy()
+            msg_copy.append(self._openai_reformat_messages(resp_msg))
+            with open(self.log_file, "a") as f:
+                f.write(json.dumps(msg_copy) + ",\n")
+        return resp_content
+    
+    def stream_complete(self, messages: list[dict[str, str]], **kwargs) -> str:
+        ollama_messages = self._ollama_reformat_messages(messages)
+        stream = self.client.chat(
+            model=self.model_name,
+            messages=ollama_messages,
+            stream=True,
+            **kwargs
+        )
+        for chunk in stream:
+            yield chunk['message']['content']

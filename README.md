@@ -5,7 +5,7 @@ https://github.com/user-attachments/assets/b3ebcbc1-7010-4f44-bdaa-0c7998e655f6
 ### Windows installation
 The most easy way to run AI-Snip is by downloading the binary from the releases page and running it.
 
-If you are python-savy, you may instead:
+If you are python-savvy, you may instead:
 1. Clone this repo
 2. `pip install pyqt6 pyperclip keyboard openai`
 3. `python aisnip.py` from the root of this repo
@@ -28,13 +28,13 @@ There are two methods to add you api key.
 2. A somewhat more clean way is to add your key to the environment variables. If *OPENAI_API_KEY* or *AZURE_OPENAI_API_KEY* is set, then aisnip will use them automatically.
 
 ## Usage
-When you start AI-Snip, it will minize itself to the system tray.
+When you start AI-Snip, it will minimize itself to the system tray.
 
 To start snipping, you can  
 a) right-click on clippy in your system tray and then click `AI Snip`  
 b) Press `CTRL+SHIFT+A`
 
-During snipping, you are by default in explaination mode. When you snip a region, clippy will pop up after a few seconds and explain whatever you snipped.
+During snipping, you are by default in explanation mode. When you snip a region, clippy will pop up after a few seconds and explain whatever you snipped.
 
 There are various hotkeys available while snipping:
 * **D**: Toggles clippy (always starts on)
@@ -47,4 +47,4 @@ There are various hotkeys available while snipping:
 ## Adding to startup
 If you want to use AI-Snip as an everyday tool, you may want to always have it in your system tray.
 
-The easiest way to accomplish this is to donwload the binary, create a Shortcut for it, then go `win + r` and type `shell:startup` and press Enter. Then move your shortcut in the folder that opened.
+The easiest way to accomplish this is to download the binary, create a Shortcut for it, then go `win + r` and type `shell:startup` and press Enter. Then move your shortcut in the folder that opened.

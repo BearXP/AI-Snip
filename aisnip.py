@@ -25,6 +25,7 @@ from util import (
     local_image_to_data_url,
     AzureModelWrapper,
     OpenAIModelWrapper,
+    OllamaModelWrapper,
     ModelWrapper,
     resource_path
 )
@@ -217,7 +218,8 @@ elif os.path.isfile("openai_api_key.txt"):
         api_key = f.read().strip()
     model = OpenAIModelWrapper(api_key=api_key)
 else:
-    model = None
+    model = OllamaModelWrapper()
+    # model = None
     
 window = SnippingTool(model)
 speech_bubble = SpeechBubbleWidget()
